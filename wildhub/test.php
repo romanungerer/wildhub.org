@@ -8,31 +8,14 @@ include('db_config.php');
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WildHub - Support Conservation</title>
-  
-  <meta name="description" content="WildHub connects people with wildlife conservation projects. Support conservation efforts worlwide. Discover organizations protecting nature, donate to wildlife conservation causes you care about, or create a page for your own organization to share your mission and receive donations. Join the movement for preserving life on Earth." />
-  
-  <!-- Standard favicon -->
-<link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <meta name="description" content="WildHub connects people with wildlife conservation projects. Discover and support organizations protecting nature, donate to causes you care about, or create a page for your own conservation organization to share your mission and receive donations. Join the movement for wildlife protection." />
 
-<link rel="icon" href="/favicon.ico" type="image/x-icon">
-
-<!-- Apple touch icon -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    .visually-hidden {
-  position: absolute !important;
-  width: 1px; 
-  height: 1px; 
-  margin: -1px; 
-  padding: 0; 
-  border: 0; 
-  clip: rect(0 0 0 0); 
-  overflow: hidden;
-  white-space: nowrap;
-}
     body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; background: #f0f4f8; }
     header { background: #004d40; color: white; padding: 1rem 2rem; padding-left: 15px;
       text-align: center; display: flex; justify-content: space-between; align-items: center;
@@ -61,28 +44,22 @@ include('db_config.php');
       border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); overflow: hidden; z-index: 10; width: 220px; }
     .dropdown-menu a { display: block; padding: 12px; color: #004d40; text-decoration: none; font-weight: 500;
       transition: background 0.2s; }
-      
     .dropdown-menu a:hover { background-color: #e0f2f1; }
     .dropdown-menu.show { display: block; }
   </style>
 </head>
 <body>
-
   <header>
-    
     <div style="display: flex; align-items: center; gap: 10px;">
-    <a href="index.php">
       <div class="logo-container">
         <img src="logo.png" alt="WildHub Logo" class="logo-img">
       </div>
-      </a>
-      <h1 style="font-size: 40px;">wildhub</h1>
+      <h1 style="font-size: 50px;">wildhub</h1>
     </div>
 
     <div class="menu-icon" id="menuIcon">
       <div></div><div></div><div></div>
     </div>
-    
 
     <div class="dropdown-menu" id="dropdownMenu">
       <a href="about.php">About Us</a>
@@ -96,7 +73,7 @@ include('db_config.php');
           $stmt->execute();
           $res = $stmt->get_result();
           if ($res && $res->num_rows > 0) {
-            echo '<a href="edit_my_project.php">Edit My Organization</a>';
+            echo '<a href="edit_my_project.php">✏️ Edit My Organization</a>';
           }
           $stmt->close();
         }
@@ -109,7 +86,7 @@ include('db_config.php');
   </header>
 
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search by name, country, species, etc." onkeyup="filterProjects()">
+    <input type="text" id="searchInput" placeholder="Search for an organization..." onkeyup="filterProjects()">
   </div>
 
   <div class="projects" id="projectsContainer">

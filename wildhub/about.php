@@ -8,7 +8,7 @@ include('db_config.php');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WildHub - Support Conservation</title>
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; background: #f0f4f8; }
@@ -25,6 +25,7 @@ include('db_config.php');
     .projects {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem; padding: 2rem;
+      text-align: justify; 
     }
     .project {
       background: white; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -60,10 +61,11 @@ include('db_config.php');
 <body>
   <header>
     <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="index.php">
       <div class="logo-container">
         <img src="logo.png" alt="WildHub Logo" class="logo-img">
-      </div>
-      <h1 style="font-size: 50px;">wildhub</h1>
+      </div></a>
+      <h1 style="font-size: 40px;">wildhub</h1>
     </div>
     <div class="menu-icon" id="menuIcon">
       <div></div><div></div><div></div>
@@ -84,7 +86,7 @@ include('db_config.php');
 
   
 
-  <div class="projects" id="projectsContainer">
+  <div class="projects" id="projectsContainer" >
     WildHub is a global platform dedicated to connecting people and organizations in the fight to protect life on Earth.
 Its mission is to unify conservation efforts worldwide, providing a space where anyone can easily discover, support, and engage with real projects that safeguard biodiversity.
 WildHub transforms scattered conservation initiatives into accessible, actionable opportunities — empowering individuals and institutions to make transparent donations, join volunteer programs, and contribute to meaningful environmental impact.<br><br>

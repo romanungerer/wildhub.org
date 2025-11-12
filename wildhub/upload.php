@@ -7,6 +7,8 @@ if(!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
+
+$user = $_SESSION['user'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,8 +35,8 @@ if(!isset($_SESSION['user'])) {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
-    align-items: center; /* centra horizontalmente el contenido */
-    justify-content: center; /* centra verticalmente si el contenido es más pequeño */
+    align-items: center; 
+    justify-content: center;
   }
 
   h2 {
@@ -46,13 +48,13 @@ if(!isset($_SESSION['user'])) {
   form {
     display: flex;
     flex-direction: column;
-    align-items: center; /* centra los elementos dentro del form */
+    align-items: center; 
     gap: 1rem;
-    width: 100%; /* mantiene el ancho completo dentro del contenedor */
-    max-width: 400px; /* limita el ancho del formulario para centrarlo mejor */
+    width: 100%; 
+    max-width: 400px;
   }
 
-  input, textarea {
+  input, textarea, select {
     padding: 0.75rem;
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -92,72 +94,159 @@ if(!isset($_SESSION['user'])) {
 <body>
 <header>
     <div style="display: flex; align-items: center; gap: 10px;">
+    <a href="index.php">
       <div class="logo-container">
         <img src="logo.png" alt="WildHub Logo" class="logo-img">
       </div>
-      <h1 style="font-size: 50px;">wildhub</h1>
+      </a>
+      <h1 style="font-size: 40px;">wildhub</h1>
     </div>
+   
 </header>
 
 <div class="container">
     <h2>Add a New Organization</h2>
 
-    <?php
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $title = $_POST['title'];
-      $description = $_POST['description'];
-      $link = $_POST['link'];
-      $country = $_POST['country'];
-      $exact_location = $_POST['exact_location'] ?? null;
-      $species = $_POST['species'] ?? null;
+<?php
+$hasOrg = false;
+if ($user !== 'wildhub') {
+    $checkStmt = $conn->prepare("SELECT COUNT(*) FROM projects WHERE created_by = ?");
+    $checkStmt->bind_param("s", $user);
+    $checkStmt->execute();
+    $checkStmt->bind_result($count);
+    $checkStmt->fetch();
+    $checkStmt->close();
 
-      // Handle image upload
-      $targetDir = "uploads/";
-      if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
+    if ($count > 0) {
+        $hasOrg = true;
+        echo "<p class='error'>You already have an organization registered. Contact us for more info</p>";
+    }
+}
 
-      $fileName = basename($_FILES["image"]["name"]);
-      $targetFilePath = $targetDir . time() . "_" . $fileName;
-      $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$hasOrg) {
+  $title = $_POST['title'];
+  $description = $_POST['description'];
+  $mission = $_POST['mission'];
+  $actions = $_POST['actions'];
+  $email = $_POST['email'];
+  $donation_use = $_POST['donation_use'];
+  $social_media_link = $_POST['social_media_link'];
+  $link = $_POST['link'];
+  $country = $_POST['country'];
+  $exact_location = $_POST['exact_location'] ?? null;
+  $species = $_POST['species'] ?? null;
+  $legally_constituted = $_POST['legally_constituted'] ?? 'No';
+  $area_conserved_m2 = !empty($_POST['area_conserved_m2']) ? intval($_POST['area_conserved_m2']) : null;
+  $organisms_protected = !empty($_POST['organisms_protected']) ? intval($_POST['organisms_protected']) : null;
+  $created_by = $_SESSION['user'];
 
-      $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
-      if (in_array($fileType, $allowedTypes)) {
-        if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
-          // Insert into database
-          $stmt = $conn->prepare("INSERT INTO projects (title, description, image, link, country, exact_location, species) VALUES (?, ?, ?, ?, ?, ?, ?)");
-          $stmt->bind_param("sssssss", $title, $description, $targetFilePath, $link, $country, $exact_location, $species);
+  // Handle image upload
+  $targetDir = "uploads/";
+  if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
 
-          if ($stmt->execute()) {
-            echo "<p class='success'>Organization added successfully!</p>";
-          } else {
-            echo "<p class='error'>Database error: " . htmlspecialchars($conn->error) . "</p>";
-          }
+  $fileName = basename($_FILES["image"]["name"]);
+  $targetFilePath = $targetDir . time() . "_" . $fileName;
+  $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
 
-          $stmt->close();
-        } else {
-          echo "<p class='error'>Error uploading image.</p>";
+  $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+  $additionalImages = [];
+
+  // handle additional images
+  if (!empty($_FILES['additional_images']['name'][0])) {
+    foreach ($_FILES['additional_images']['name'] as $key => $imgName) {
+      $imgTmp = $_FILES['additional_images']['tmp_name'][$key];
+      $imgType = strtolower(pathinfo($imgName, PATHINFO_EXTENSION));
+      if (in_array($imgType, $allowedTypes)) {
+        $newPath = $targetDir . time() . "_" . basename($imgName);
+        if (move_uploaded_file($imgTmp, $newPath)) {
+          $additionalImages[] = $newPath;
         }
-      } else {
-        echo "<p class='error'>Invalid file type. Only JPG, PNG, and GIF allowed.</p>";
       }
     }
-    ?>
+  }
 
-    <form method="POST" enctype="multipart/form-data">
-      <input type="text" name="title" placeholder="Organization Name" required>
-      <textarea name="description" placeholder="Short Description" rows="4" required></textarea>
-      <input type="url" name="link" placeholder="Donation Link" required>
-      
-      <input type="text" name="country" placeholder="Country" required>
-      <input type="text" name="exact_location" placeholder="Exact Location* (google maps link)">
-      <input type="text" name="species" placeholder="Remarkable Species (Example: Gorila, Whale, Baobab)">
+  if (in_array($fileType, $allowedTypes)) {
+    if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
+      $additionalImagesStr = implode(",", $additionalImages);
 
-      <input type="file" name="image" accept="image/*" required>
-      <button type="submit">Upload Organization</button>
-    </form>
+      $stmt = $conn->prepare("INSERT INTO projects 
+        (title, description, email, mission, actions, donation_use, social_media_link, image, link, country, exact_location, species, legally_constituted, area_conserved_m2, organisms_protected_per_month, additional_images, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      $stmt->bind_param("sssssssssssssiiss",
+        $title,
+        $description,
+        $email,
+        $mission,
+        $actions,
+        $donation_use,
+        $social_media_link,
+        $targetFilePath,
+        $link,
+        $country,
+        $exact_location,
+        $species,
+        $legally_constituted,
+        $area_conserved_m2,
+        $organisms_protected,
+        $additionalImagesStr,
+        $created_by
+      );
 
-    <p style="text-align:center; margin-top:1rem;">
-      <a href="index.php" style="color:#00796b; text-decoration:none;">← Back to Home</a>
-    </p>
+      if ($stmt->execute()) {
+        echo "<p class='success'>Organization added successfully!</p>";
+      } else {
+        echo "<p class='error'>Database error: " . htmlspecialchars($conn->error) . "</p>";
+      }
+
+      $stmt->close();
+    } else {
+      echo "<p class='error'>Error uploading image.</p>";
+    }
+  } else {
+    echo "<p class='error'>Invalid file type. Only JPG, PNG, and GIF allowed.</p>";
+  }
+}
+?>
+
+<?php if (!$hasOrg || $user === 'wildhub') : ?>
+<form method="POST" enctype="multipart/form-data">
+  <input type="text" name="title" placeholder="Organization Name" required>
+  <input type="email" name="email" placeholder="E-mail"  required>     
+  <input type="url" name="social_media_link" placeholder="Social Media Link (Instagram, Facebook, etc.)" required>
+  <input type="url" name="link" placeholder="Main Donation Link" required>
+  
+
+  <input type="text" name="country" placeholder="Country" required>
+  <input type="text" name="exact_location" placeholder="Exact Location (Google Maps link)">
+  <input type="text" name="species" placeholder="Protected Species (Example: Gorilla, Whale, Baobab)">
+  
+  <textarea name="description" placeholder="Short Description" rows="3" required></textarea>
+
+  <textarea name="mission" placeholder="¿What is your mission?" rows="3" required></textarea>
+  <textarea name="actions" placeholder="¿What specific actions are being made to achieve it?" rows="3" required></textarea>
+  <textarea name="donation_use" placeholder="¿How exactly is the money from donations going to be spent?" rows="3" required></textarea>
+
+  <label>¿Are you a legally constituted ONG?</label>
+  <select name="legally_constituted" required>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+
+  <input type="number" name="area_conserved_m2" placeholder="Number of m² conserved">
+  <input type="number" name="organisms_protected" placeholder="Nº of individual organisms protected">
+
+  <label>Main photo:</label>
+  <input type="file" name="image" accept="image/*" required>
+  <label>Additional photos:</label>
+  <input type="file" name="additional_images[]" accept="image/*" multiple>
+
+  <button type="submit">Upload Organization</button>
+</form>
+<?php endif; ?>
+
+<p style="text-align:center; margin-top:1rem;">
+  <a href="index.php" style="color:#00796b; text-decoration:none;">← Back to Home</a>
+</p>
 </div>
 </body>
 </html>

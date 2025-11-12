@@ -62,7 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login / Sign Up - WildHub</title>
+<link rel="icon" type="image/png" href="/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
 body { font-family: 'Roboto', sans-serif; margin: 0; background: #f0f4f8; }
 h1 { font-size: 2rem; margin: 0; }
@@ -93,10 +95,12 @@ main {
 
  <header>
     <div style="display: flex; align-items: center; gap: 10px;">
+    <a href="index.php">
       <div class="logo-container">
         <img src="logo.png" alt="WildHub Logo" class="logo-img">
       </div>
-      <h1 style="font-size: 50px;">wildhub</h1>
+      </a>
+      <h1 style="font-size: 40px;">wildhub</h1>
     </div>
 </header>
 
